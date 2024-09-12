@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Entry = require('../Entry');
+const { connectToDatabase, disconnectFromDatabase } = require('../db');
 
 /**
  * @swagger
@@ -54,10 +55,13 @@ const Entry = require('../Entry');
  */
 router.get('/', async (req, res) => {
     try {
+        await connectToDatabase();
         const entry = await Entry.find();
         res.json(entry);
     } catch (err) {
         res.status(500).json({ message: err.message });
+    } finally {
+        await disconnectFromDatabase();
     }
 });
 
@@ -89,10 +93,13 @@ router.get('/', async (req, res) => {
  */
 router.get('/title/:title', async (req, res) => {
     try {
+        await connectToDatabase();
         const entry = await Entry.find({ title: req.params.title });
         res.json(entry);
     } catch (err) {
         res.status(500).json({ message: err.message });
+    } finally {
+        await disconnectFromDatabase();
     }
 });
 
@@ -122,6 +129,7 @@ router.get('/title/:title', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
     try {
+        await connectToDatabase();
         const entry = await Entry.findById(req.params.id);
         if (!entry) {
             return res.status(404).json({ message: "Entry not found" });
@@ -129,6 +137,8 @@ router.get('/:id', async (req, res) => {
         res.json(entry);
     } catch (err) {
         res.status(500).json({ message: err.message });
+    } finally {
+        await disconnectFromDatabase();
     }
 });
 
@@ -167,10 +177,13 @@ router.post('/', async (req, res) => {
     });
 
     try {
+        await connectToDatabase();
         const newEntry = await entry.save();
         res.status(201).json(newEntry);
     } catch (err) {
         res.status(400).json({ message: err.message });
+    } finally {
+        await disconnectFromDatabase();
     }
 });
 
@@ -206,6 +219,7 @@ router.post('/', async (req, res) => {
  */
 router.put('/:id', async (req, res) => {
     try {
+        await connectToDatabase();
         const entry = await Entry.findById(req.params.id);
         if (!entry) {
             return res.status(404).json({ message: "Entry not found" });
@@ -219,6 +233,8 @@ router.put('/:id', async (req, res) => {
         res.json(updatedEntry);
     } catch (err) {
         res.status(500).json({ message: err.message });
+    } finally {
+        await disconnectFromDatabase();
     }
 });
 
@@ -243,6 +259,7 @@ router.put('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
     try {
+        await connectToDatabase();
         const entry = await Entry.findByIdAndDelete(req.params.id);
         if (!entry) {
             return res.status(404).json({ message: "Entry not found" });
@@ -250,6 +267,8 @@ router.delete('/:id', async (req, res) => {
         res.json({ message: "Entry deleted" });
     } catch (err) {
         res.status(500).json({ message: err.message });
+    } finally {
+        await disconnectFromDatabase();
     }
 });
 
